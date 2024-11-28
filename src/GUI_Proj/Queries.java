@@ -37,12 +37,22 @@ public class Queries {
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setInt(1, publicationId);
             ResultSet resultSet = pstmt.executeQuery();
+
+            // Check if the ResultSet contains any rows
+            if (!resultSet.isBeforeFirst()) { // No rows in the ResultSet
+                JOptionPane.showMessageDialog(null, "No results found for Publication ID: " + publicationId,
+                        "No Results", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            // If rows are found, display the results
             displayTableData(resultSet, "Publication ID: " + publicationId);
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error fetching data: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     public static void searchByAttributes(Connection connection, String author, String title, String year,
                                           String type, String sortBy, boolean includePublicationId, boolean includeAuthor,

@@ -29,14 +29,13 @@ public class SQLFileExecutor {
                 // If the line ends with a semicolon, execute the SQL command
                 if (line.endsWith(";")) {
                     String sql = sqlBuilder.toString().replace(";", "").trim(); // Remove semicolon
-                    System.out.println("Executing SQL: " + sql); // Log SQL command
                     try {
                         statement.execute(sql);
-                        statementCount++;
-                        System.out.println("Successfully executed statement #" + statementCount);
+                        System.out.println("Executed: " + sql); // Log successful execution
                     } catch (SQLException e) {
-                        System.err.println("Failed to execute SQL: " + sql);
-                        throw new SQLException("Error executing SQL statement: " + sql, e);
+                        // Handle specific SQL errors (e.g., table does not exist)
+                        System.err.println("Error executing SQL: " + sql);
+                        System.err.println("Skipping this statement due to: " + e.getMessage());
                     }
                     sqlBuilder.setLength(0); // Reset for the next command
                 }
