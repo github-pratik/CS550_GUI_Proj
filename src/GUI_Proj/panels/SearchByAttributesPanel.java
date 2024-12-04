@@ -5,6 +5,8 @@ import GUI_Proj.Queries;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SearchByAttributesPanel {
     private JPanel panel;
@@ -17,58 +19,32 @@ public class SearchByAttributesPanel {
         JLabel titleLabel = new JLabel("Search by Attributes", SwingConstants.CENTER);
         panel.add(titleLabel, BorderLayout.NORTH);
 
-        // Center panel for form components
+        // Center panel for input and output fields
         JPanel centerPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
 
         // Input fields
-        JLabel authorLabel = new JLabel("AUTHOR (Leave blank to ignore):");
+        JLabel authorLabel = new JLabel("AUTHOR (leave blank to skip):");
         JTextField authorField = new JTextField(15);
-
-        JLabel titleLabelField = new JLabel("TITLE (Leave blank to ignore):");
+        JLabel titleLabelInput = new JLabel("TITLE (leave blank to skip):");
         JTextField titleField = new JTextField(15);
-
-        JLabel yearLabel = new JLabel("YEAR (Leave blank to ignore):");
+        JLabel yearLabel = new JLabel("YEAR (leave blank to skip):");
         JTextField yearField = new JTextField(15);
-
-        JLabel typeLabel = new JLabel("TYPE (Leave blank to ignore):");
+        JLabel typeLabel = new JLabel("TYPE (leave blank to skip):");
         JTextField typeField = new JTextField(15);
 
-        // Sort By ComboBox
-        JLabel sortByLabel = new JLabel("Sort by:");
-        JComboBox<String> sortByComboBox = new JComboBox<>(new String[]{"PUBLICATIONID", "AUTHOR", "TITLE", "YEAR", "TYPE"});
+        // Output field checkboxes
+        JCheckBox outputPublicationId = new JCheckBox("PUBLICATIONID");
+        JCheckBox outputAuthor = new JCheckBox("AUTHOR");
+        JCheckBox outputTitle = new JCheckBox("TITLE");
+        JCheckBox outputYear = new JCheckBox("YEAR");
+        JCheckBox outputType = new JCheckBox("TYPE");
+        JCheckBox outputSummary = new JCheckBox("SUMMARY");
 
-        // Checkboxes for fields to include in results
-        JCheckBox includePublicationId = new JCheckBox("PUBLICATIONID");
-        JCheckBox includeAuthor = new JCheckBox("AUTHOR");
-        JCheckBox includeTitle = new JCheckBox("TITLE");
-        JCheckBox includeYear = new JCheckBox("YEAR");
-        JCheckBox includeType = new JCheckBox("TYPE");
-        JCheckBox includeSummary = new JCheckBox("SUMMARY");
-
-        // Search Button
         JButton searchButton = new JButton("Search");
-        searchButton.addActionListener(e -> {
-            // Get input values
-            String author = authorField.getText().trim();
-            String title = titleField.getText().trim();
-            String year = yearField.getText().trim();
-            String type = typeField.getText().trim();
-            String sortBy = (String) sortByComboBox.getSelectedItem();
 
-            try {
-                // Call the Queries.searchByAttributes method
-                Queries.searchByAttributes(mainGUI.getConnection(), author, title, year, type, sortBy,
-                        includePublicationId.isSelected(), includeAuthor.isSelected(), includeTitle.isSelected(),
-                        includeYear.isSelected(), includeType.isSelected(), includeSummary.isSelected());
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(panel, "Error during search: " + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        // Adding components to the center panel
+        // Layout input fields
         gbc.gridx = 0;
         gbc.gridy = 0;
         centerPanel.add(authorLabel, gbc);
@@ -77,7 +53,7 @@ public class SearchByAttributesPanel {
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        centerPanel.add(titleLabelField, gbc);
+        centerPanel.add(titleLabelInput, gbc);
         gbc.gridx = 1;
         centerPanel.add(titleField, gbc);
 
@@ -93,36 +69,37 @@ public class SearchByAttributesPanel {
         gbc.gridx = 1;
         centerPanel.add(typeField, gbc);
 
+        // Layout output fields
         gbc.gridx = 0;
         gbc.gridy = 4;
-        centerPanel.add(sortByLabel, gbc);
-        gbc.gridx = 1;
-        centerPanel.add(sortByComboBox, gbc);
+        gbc.gridwidth = 2;
+        centerPanel.add(new JLabel("Select Output Fields:"), gbc);
 
-        gbc.gridx = 0;
+        gbc.gridwidth = 1;
         gbc.gridy = 5;
-        centerPanel.add(includePublicationId, gbc);
+        centerPanel.add(outputPublicationId, gbc);
         gbc.gridx = 1;
-        centerPanel.add(includeAuthor, gbc);
+        centerPanel.add(outputAuthor, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 6;
-        centerPanel.add(includeTitle, gbc);
+        centerPanel.add(outputTitle, gbc);
         gbc.gridx = 1;
-        centerPanel.add(includeYear, gbc);
+        centerPanel.add(outputYear, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 7;
-        centerPanel.add(includeType, gbc);
+        centerPanel.add(outputType, gbc);
         gbc.gridx = 1;
-        centerPanel.add(includeSummary, gbc);
+        centerPanel.add(outputSummary, gbc);
 
+        // Search button
         gbc.gridx = 0;
         gbc.gridy = 8;
         gbc.gridwidth = 2;
         centerPanel.add(searchButton, gbc);
 
-        // Add the center panel to the root panel
+        // Add center panel to the root panel
         panel.add(centerPanel, BorderLayout.CENTER);
 
         // Back button at the bottom
@@ -132,6 +109,65 @@ public class SearchByAttributesPanel {
         backButtonPanel.add(backButton);
 
         panel.add(backButtonPanel, BorderLayout.SOUTH);
+
+        // Action listener for the Search button
+        searchButton.addActionListener(e -> {
+            // Collect input fields
+            String author = authorField.getText().trim();
+            String title = titleField.getText().trim();
+            String year = yearField.getText().trim();
+            String type = typeField.getText().trim();
+
+            // Validate at least one input field
+            if (author.isEmpty() && title.isEmpty() && year.isEmpty() && type.isEmpty()) {
+                JOptionPane.showMessageDialog(panel, "You must provide at least one input field.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Collect selected output fields
+            List<String> selectedOutputFields = new ArrayList<>();
+            boolean includePublicationId = outputPublicationId.isSelected();
+            boolean includeAuthor = outputAuthor.isSelected();
+            boolean includeTitle = outputTitle.isSelected();
+            boolean includeYear = outputYear.isSelected();
+            boolean includeType = outputType.isSelected();
+            boolean includeSummary = outputSummary.isSelected();
+
+            if (includePublicationId) selectedOutputFields.add("PUBLICATIONID");
+            if (includeAuthor) selectedOutputFields.add("AUTHOR");
+            if (includeTitle) selectedOutputFields.add("TITLE");
+            if (includeYear) selectedOutputFields.add("YEAR");
+            if (includeType) selectedOutputFields.add("TYPE");
+            if (includeSummary) selectedOutputFields.add("SUMMARY");
+
+            // Validate at least one output field
+            if (selectedOutputFields.isEmpty()) {
+                JOptionPane.showMessageDialog(panel, "You must select at least one output field.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Sorting menu
+            String[] sortingOptions = selectedOutputFields.toArray(new String[0]);
+            String sortBy = (String) JOptionPane.showInputDialog(panel, "Choose a field to sort by:", "Sort By",
+                    JOptionPane.QUESTION_MESSAGE, null, sortingOptions, sortingOptions[0]);
+
+            if (sortBy == null) {
+                JOptionPane.showMessageDialog(panel, "Sorting is mandatory. Please select a sorting option.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Execute the query
+            try {
+                Queries.searchByAttributes(
+                        mainGUI.getConnection(),
+                        author, title, year, type,
+                        sortBy, includePublicationId, includeAuthor,
+                        includeTitle, includeYear, includeType, includeSummary
+                );
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(panel, "An error occurred: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 
     public JPanel getPanel() {

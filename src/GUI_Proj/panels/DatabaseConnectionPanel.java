@@ -6,6 +6,7 @@ import GUI_Proj.MainGUI;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 
 public class DatabaseConnectionPanel {
     private JPanel panel;
@@ -24,14 +25,23 @@ public class DatabaseConnectionPanel {
         connectButton.addActionListener(e -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
+
             try {
                 Connection connection = DatabaseConnector.connect(username, password);
                 mainGUI.setConnection(connection);
-                JOptionPane.showMessageDialog(panel, "Connection successful!");
+
+                // Get and display database metadata
+                DatabaseMetaData metaData = connection.getMetaData();
+                String message = "Connected.\n"
+                        + "Database Product Name: " + metaData.getDatabaseProductName() + "\n"
+                        + "Database Product Version: " + metaData.getDatabaseProductVersion() + "\n"
+                        + "Database Driver Name: " + metaData.getDriverName() + "\n"
+                        + "Database Driver Version: " + metaData.getDriverVersion();
+                JOptionPane.showMessageDialog(panel, message, "Database Connection Successful", JOptionPane.INFORMATION_MESSAGE);
+
                 mainGUI.showCard("SQLFileUpload");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(panel, "Failed to connect: " + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(panel, "Connection failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -40,13 +50,15 @@ public class DatabaseConnectionPanel {
         panel.add(usernameLabel, gbc);
         gbc.gridx = 1;
         panel.add(usernameField, gbc);
+
         gbc.gridx = 0;
         gbc.gridy = 1;
         panel.add(passwordLabel, gbc);
         gbc.gridx = 1;
         panel.add(passwordField, gbc);
-        gbc.gridy = 2;
+
         gbc.gridx = 0;
+        gbc.gridy = 2;
         gbc.gridwidth = 2;
         panel.add(connectButton, gbc);
     }

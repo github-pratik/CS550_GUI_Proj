@@ -1,11 +1,8 @@
+
 package GUI_Proj;
 
-import GUI_Proj.panels.DatabaseConnectionPanel;
-import GUI_Proj.panels.MainMenuPanel;
-import GUI_Proj.panels.SQLFileUploadPanel;
-import GUI_Proj.panels.SearchByPublicationIDPanel;
-import GUI_Proj.panels.SearchByAttributesPanel;
-import GUI_Proj.panels.ViewTablesPanel;
+
+import GUI_Proj.panels.*;
 
 import javax.swing.*;
 import java.awt.*;
